@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Add / Edit Book - SmartLib Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="site-body">
+
+    <!-- Reusable Header Fragment -->
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="site-main dashboard-main">
+        <div class="container auth-container book-form-container">
+
+            <div class="card-panel book-form-card">
+                <div class="panel-header">
+                    <div>
+                        <span class="badge-role badge-role-admin">Admin Inventory Operation</span>
+                        <h1 class="panel-title text-xl mt-1" th:text="${isEdit ? 'Edit Book Record' : 'Register New Book Title'}">
+                            Register New Book Title
+                        </h1>
+                        <span class="panel-subtitle">Enforces copy counts, unique ISBN indexing, and stack wayfinding</span>
+                    </div>
+                </div>
+
+                <div class="panel-body">
+                    <!-- Form Form Bind -->
+                    <form th:action="${isEdit ? '/admin/books/' + bookId + '/edit' : '/admin/books'}"
+                          th:object="${bookDto}"
+                          method="post"
+                          class="book-management-form"
+                          id="bookAdminForm">
+
+                        <!-- Global error banner -->
+                        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-error" role="alert">
+                            <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                        </div>
+
+                        <!-- Row 1: Title -->
+                        <div class="form-group">
+                            <label for="title" class="form-label">Book Title <span class="text-red">*</span></label>
+                            <input
+                                type="text"
+                                id="title"
+                                th:field="*{title}"
+                                class="form-control"
+                                th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
+                                placeholder="e.g. Introduction to Algorithms, Fourth Edition"
+                                required
+                            />
+                            <div th:if="${#fields.hasErrors('title')}" class="form-feedback error-text" th:errors="*{title}">Title error</div>
+                        </div>
+
+                        <!-- Row 2: Author & Category -->
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="author" class="form-label">Author(s) <span class="text-red">*</span></label>
+                                <input
+                                    type="text"
+                                    id="author"
+                                    th:field="*{author}"
+                                    class="form-control"
+                                    th:classappend="${#fields.hasErrors('author')} ? 'is-invalid' : ''"
+                                    placeholder="e.g. Thomas H. Cormen, Charles E. Leiserson"
+                                    required
+                                />
+                                <div th:if="${#fields.hasErrors('author')}" class="form-feedback error-text" th:errors="*{author}">Author error</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="category" class="form-label">Academic Subject / Category <span class="text-red">*</span></label>
+                                <input
+                                    type="text"
+                                    id="category"
+                                    th:field="*{category}"
+                                    class="form-control"
+                                    th:classappend="${#fields.hasErrors('category')} ? 'is-invalid' : ''"
+                                    placeholder="e.g. Computer Science, Mathematics, Physics"
+                                    required
+                                />
+                                <div th:if="${#fields.hasErrors('category')}" class="form-feedback error-text" th:errors="*{category}">Category error</div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: ISBN, Publisher, Publication Year -->
+                        <div class="form-row-3">
+                            <div class="form-group">
+                                <label for="isbn" class="form-label">ISBN-10 or ISBN-13</label>
+                                <input
+                                    type="text"
+                                    id="isbn"
+                                    th:field="*{isbn}"
+                                    class="form-control font-mono"
+                                    th:classappend="${#fields.hasErrors('isbn')} ? 'is-invalid' : ''"
+                                    placeholder="e.g. 9780262046305"
+                                />
+                                <div th:if="${#fields.hasErrors('isbn')}" class="form-feedback error-text" th:errors="*{isbn}">ISBN error</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="publisher" class="form-label">Publisher</label>
+                                <input
+                                    type="text"
+                                    id="publisher"
+                                    th:field="*{publisher}"
+                                    class="form-control"
+                                    th:classappend="${#fields.hasErrors('publisher')} ? 'is-invalid' : ''"
+                                    placeholder="e.g. MIT Press, Wiley"
+                                />
+                                <div th:if="${#fields.hasErrors('publisher')}" class="form-feedback error-text" th:errors="*{publisher}">Publisher error</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="publicationYear" class="form-label">Publication Year <span class="text-red">*</span></label>
+                                <input
+                                    type="number"
+                                    id="publicationYear"
+                                    th:field="*{publicationYear}"
+                                    class="form-control font-mono"
+                                    th:classappend="${#fields.hasErrors('publicationYear')} ? 'is-invalid' : ''"
+                                    placeholder="2022"
+                                    min="1000"
+                                    max="2100"
+                                    required
+                                />
+                                <div th:if="${#fields.hasErrors('publicationYear')}" class="form-feedback error-text" th:errors="*{publicationYear}">Year error</div>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Shelf Location -->
+                        <div class="form-group">
+                            <label for="shelfLocation" class="form-label">Shelf Location Locator <span class="text-red">*</span></label>
+                            <input
+                                type="text"
+                                id="shelfLocation"
+                                th:field="*{shelfLocation}"
+                                class="form-control font-mono"
+                                th:classappend="${#fields.hasErrors('shelfLocation')} ? 'is-invalid' : ''"
+                                placeholder="e.g. Stack 2 - Row B - Bay 1 (Room 204)"
+                                required
+                            />
+                            <div th:if="${#fields.hasErrors('shelfLocation')}" class="form-feedback error-text" th:errors="*{shelfLocation}">Shelf error</div>
+                            <span class="text-[11px] text-muted">Specifies exact campus stack and floor aisle for physical wayfinding.</span>
+                        </div>
+
+                        <!-- Row 5: Total Copies & Available Copies -->
+                        <div class="form-row-2">
+                            <div class="form-group">
+                                <label for="totalCopies" class="form-label">Total Copies in Holdings <span class="text-red">*</span></label>
+                                <input
+                                    type="number"
+                                    id="totalCopies"
+                                    th:field="*{totalCopies}"
+                                    class="form-control font-mono"
+                                    th:classappend="${#fields.hasErrors('totalCopies')} ? 'is-invalid' : ''"
+                                    min="0"
+                                    required
+                                />
+                                <div th:if="${#fields.hasErrors('totalCopies')}" class="form-feedback error-text" th:errors="*{totalCopies}">Total error</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="availableCopies" class="form-label">Available Copies on Shelf <span class="text-red">*</span></label>
+                                <input
+                                    type="number"
+                                    id="availableCopies"
+                                    th:field="*{availableCopies}"
+                                    class="form-control font-mono"
+                                    th:classappend="${#fields.hasErrors('availableCopies')} ? 'is-invalid' : ''"
+                                    min="0"
+                                    required
+                                />
+                                <div th:if="${#fields.hasErrors('availableCopies')}" class="form-feedback error-text" th:errors="*{availableCopies}">Available error</div>
+                                <span class="text-[11px] text-muted">Must satisfy: 0 &le; Available &le; Total.</span>
+                            </div>
+                        </div>
+
+                        <!-- Row 6: Description -->
+                        <div class="form-group">
+                            <label for="description" class="form-label">Bibliographic Synopsis / Description</label>
+                            <textarea
+                                id="description"
+                                th:field="*{description}"
+                                rows="4"
+                                class="form-control"
+                                placeholder="Enter academic synopsis, edition notes, or table of contents overview..."
+                            ></textarea>
+                        </div>
+
+                        <!-- Row 7: Active Checkbox -->
+                        <div class="form-check-group">
+                            <label class="form-check-label">
+                                <input type="checkbox" th:field="*{active}" class="form-check-input" />
+                                <span class="font-semibold text-sm">Active &amp; Visible in Public Catalogue</span>
+                            </label>
+                            <span class="text-[11px] text-muted block ml-5">
+                                Unchecking will hide this title from students while preserving past borrowing logs.
+                            </span>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions-row">
+                            <a th:href="@{/admin/books}" class="btn btn-secondary">
+                                Cancel &amp; Back
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="saveBookBtn">
+                                <span th:text="${isEdit ? 'Update Book Record' : 'Save Book to Catalogue'}">Save Book to Catalogue</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Reusable Footer Fragment -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

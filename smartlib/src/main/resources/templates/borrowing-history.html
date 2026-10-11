@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Borrowing Transaction History - SmartLib</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="site-body">
+
+    <!-- Reusable Header Fragment -->
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="site-main dashboard-main">
+        <div class="container dashboard-container">
+
+            <!-- Breadcrumb Navigation -->
+            <nav class="breadcrumb-nav mb-4" aria-label="Breadcrumb">
+                <a th:href="@{/}">Home</a>
+                <span class="breadcrumb-sep">&gt;</span>
+                <a th:href="@{/my-library}">My Library</a>
+                <span class="breadcrumb-sep">&gt;</span>
+                <span class="breadcrumb-current">Borrowing Transaction History</span>
+            </nav>
+
+            <!-- Banner -->
+            <div class="dashboard-banner">
+                <div class="banner-content">
+                    <span class="badge-role">Circulation Ledger &bull; Stage 4</span>
+                    <h1 class="dashboard-title">Borrowing Transaction History</h1>
+                    <p class="dashboard-subtitle">
+                        Complete chronological ledger of your university library circulation transactions, active checkouts, and completed returns.
+                    </p>
+                </div>
+                <div class="banner-actions">
+                    <a th:href="@{/my-library}" class="btn btn-secondary">
+                        <span>&larr; Back to Active Loans</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- History Card Panel -->
+            <div class="card-panel mt-6">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">Circulation Activity Records</h2>
+                        <span class="panel-subtitle">Preserved transaction history ensuring non-repudiation and borrowing analytics</span>
+                    </div>
+                </div>
+
+                <div class="panel-body">
+                    <!-- Empty State -->
+                    <div th:if="${#lists.isEmpty(historyRecords)}" class="empty-state py-8">
+                        <svg class="empty-icon text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <polyline points="1 4 1 10 7 10"/>
+                            <polyline points="23 20 23 14 17 14"/>
+                            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                        </svg>
+                        <h3 class="empty-title">No transaction history found</h3>
+                        <p class="empty-description">
+                            You have not initiated any borrowing transactions yet. Borrow a book from the catalogue to start your transaction history.
+                        </p>
+                        <a th:href="@{/catalogue}" class="btn btn-primary mt-4">
+                            <span>Browse Catalogue</span>
+                        </a>
+                    </div>
+
+                    <!-- History Table -->
+                    <div th:unless="${#lists.isEmpty(historyRecords)}" class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <th>Book Title &amp; Author</th>
+                                    <th>Copy Code</th>
+                                    <th>Borrowed Date</th>
+                                    <th>Due Date</th>
+                                    <th>Returned Date</th>
+                                    <th>Circulation Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="record : ${historyRecords}">
+                                    <td class="font-mono text-xs text-muted" th:text="${'TXN-' + record.id}">
+                                        TXN-1
+                                    </td>
+                                    <td>
+                                        <div class="book-row-title">
+                                            <a th:href="@{'/catalogue/' + ${record.bookCopy.book.id}}"
+                                               th:text="${record.bookCopy.book.title}"
+                                               class="font-semibold text-slate-900 hover:text-blue">
+                                                Introduction to Algorithms
+                                            </a>
+                                        </div>
+                                        <div class="text-xs text-muted" th:text="${record.bookCopy.book.author}">
+                                            Thomas H. Cormen
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="font-mono text-xs badge-role" th:text="${record.bookCopy.copyCode}">
+                                            LIB-001-C01
+                                        </span>
+                                    </td>
+                                    <td class="font-mono text-xs text-muted" th:text="${#temporals.format(record.borrowedAt, 'MMM dd, yyyy HH:mm')}">
+                                        Oct 08, 2026 09:30
+                                    </td>
+                                    <td class="font-mono text-xs text-slate-800" th:text="${#temporals.format(record.dueDate, 'MMM dd, yyyy')}">
+                                        Oct 22, 2026
+                                    </td>
+                                    <td class="font-mono text-xs">
+                                        <span th:if="${record.returnedAt != null}" class="text-green font-semibold"
+                                              th:text="${#temporals.format(record.returnedAt, 'MMM dd, yyyy HH:mm')}">
+                                            Oct 11, 2026 14:15
+                                        </span>
+                                        <span th:unless="${record.returnedAt != null}" class="text-muted">
+                                            &mdash; Currently on loan &mdash;
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${record.status.name() == 'BORROWED'}" class="status-badge status-active">
+                                            Active Loan
+                                        </span>
+                                        <span th:if="${record.status.name() == 'RETURNED'}" class="status-badge bg-slate-100 text-slate-700">
+                                            Returned
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Reusable Footer Fragment -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

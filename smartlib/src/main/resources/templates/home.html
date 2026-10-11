@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">SmartLib - Unified University Library Hub</title>
+    <meta name="description" content="Unified University Library Hub with Smart Book Discovery, Deadline Notifications and Learning Rewards">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="site-body">
+
+    <!-- Reusable Header Fragment -->
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main id="main-content" class="site-main">
+
+        <!-- ===================================================================
+             Hero Section
+             =================================================================== -->
+        <section class="hero-section" aria-labelledby="hero-title">
+            <div class="container hero-container">
+                <div class="hero-badge-wrap">
+                    <span class="hero-badge">
+                        <span class="status-indicator"></span>
+                        Academic Semester 2026-2027 &bull; Central &amp; Branch Catalogues
+                    </span>
+                </div>
+
+                <h1 id="hero-title" class="hero-heading">
+                    Your University Library, <br>
+                    <span class="text-gradient">All in One Place</span>
+                </h1>
+
+                <p class="hero-subtitle">
+                    Discover books, connect with library resources, track deadlines and make learning more engaging.
+                </p>
+
+                <!-- Search Input Form linked to /catalogue -->
+                <form class="hero-search-form" th:action="@{/catalogue}" method="get" role="search" id="heroSearchForm">
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input
+                            type="search"
+                            id="librarySearchInput"
+                            name="query"
+                            th:value="${searchQuery}"
+                            class="search-input"
+                            placeholder="Search by book title, author, subject, or ISBN..."
+                            aria-label="Search library catalogue by book title, author or subject"
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="btn btn-search" id="searchSubmitBtn">
+                            <span>Search</span>
+                            <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Action CTA Buttons -->
+                <div class="hero-actions">
+                    <a th:href="@{/catalogue}" class="btn btn-primary" id="exploreBooksBtn">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0.5-0.05"/>
+                            <path d="M6 6h10"/>
+                            <path d="M6 10h10"/>
+                        </svg>
+                        <span>Explore Books</span>
+                    </a>
+                    <a href="#services-section" class="btn btn-secondary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                        <span>Discover Library Services</span>
+                    </a>
+
+                    <!-- Role-Specific Action Shortcut -->
+                    <a sec:authorize="hasRole('USER')" th:href="@{/dashboard}" class="btn btn-primary-outline btn-hero-auth">
+                        <span>Go to My Dashboard &rarr;</span>
+                    </a>
+                    <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}" class="btn btn-primary-outline btn-hero-auth">
+                        <span>Open Admin Console &rarr;</span>
+                    </a>
+                    <a sec:authorize="isAnonymous()" th:href="@{/register}" class="btn btn-primary-outline btn-hero-auth">
+                        <span>Create Student Account</span>
+                    </a>
+                </div>
+
+                <!-- Stage 1 Search Notice if Query Provided -->
+                <div th:if="${searchQuery != null and !searchQuery.isEmpty()}" class="search-feedback-banner">
+                    <div class="feedback-badge">Stage 1 Notice</div>
+                    <p>
+                        Search query recorded for: <strong>"<span th:text="${searchQuery}"></span>"</strong>.
+                        Live database searching and indexing will be activated in <strong>Stage 3: Book Catalogue</strong>.
+                    </p>
+                    <a th:href="@{/}" class="feedback-clear">&times; Clear</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             Main Feature Cards Section (6 Feature Cards)
+             =================================================================== -->
+        <section class="features-section" id="services-section" aria-labelledby="features-title">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-tag">Core Modules</div>
+                    <h2 id="features-title" class="section-heading">Smart Library Ecosystem</h2>
+                    <p class="section-subheading">
+                        Six interconnected pillars designed to empower research, simplify physical navigation, and reward academic curiosity.
+                    </p>
+                </div>
+
+                <div class="features-grid">
+                    <!-- 1. Book Catalogue -->
+                    <div class="feature-card">
+                        <div class="feature-card-header">
+                            <div class="feature-icon-wrapper bg-blue-subtle">
+                                <svg class="feature-icon text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0.5-0.05"/>
+                                    <path d="M6 6h10"/>
+                                    <path d="M6 10h10"/>
+                                    <path d="M6 14h7"/>
+                                    <circle cx="18" cy="18" r="3"/>
+                                    <path d="m20.5 20.5-1.5-1.5"/>
+                                </svg>
+                            </div>
+                            <span class="status-badge badge-ready">Active &bull; Live Catalogue</span>
+                        </div>
+                        <h3 class="feature-title">Book Catalogue</h3>
+                        <p class="feature-description">
+                            Search and explore books across all campus branches with multi-attribute filtering, availability counts, and edition details.
+                        </p>
+                        <div class="feature-card-footer">
+                            <a th:href="@{/catalogue}" class="feature-link">
+                                <span>Browse Catalogue</span>
+                                <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 2. Syllabus Finder -->
+                    <div class="feature-card">
+                        <div class="feature-card-header">
+                            <div class="feature-icon-wrapper bg-indigo-subtle">
+                                <svg class="feature-icon text-indigo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                            </div>
+                            <span class="status-badge badge-planned">Stage 4 Planned</span>
+                        </div>
+                        <h3 class="feature-title">Syllabus Finder</h3>
+                        <p class="feature-description">
+                            Match official university course syllabus topics directly with prescribed textbooks and high-impact supplementary readings.
+                        </p>
+                        <div class="feature-card-footer">
+                            <a th:href="@{/syllabus-finder}" class="feature-link">
+                                <span>View Course Reading Lists</span>
+                                <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 3. Find on Shelf -->
+                    <div class="feature-card">
+                        <div class="feature-card-header">
+                            <div class="feature-icon-wrapper bg-amber-subtle">
+                                <svg class="feature-icon text-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                                    <polyline points="2 17 12 22 22 17"/>
+                                    <polyline points="2 12 12 17 22 12"/>
+                                </svg>
+                            </div>
+                            <span class="status-badge badge-planned">Stage 5 Planned</span>
+                        </div>
+                        <h3 class="feature-title">Find on Shelf</h3>
+                        <p class="feature-description">
+                            Locate physical books effortlessly with building wing, floor level, call-number classification, and shelf aisle guidance.
+                        </p>
+                        <div class="feature-card-footer">
+                            <a th:href="@{/shelf-finder}" class="feature-link">
+                                <span>Open Shelf Wayfinder</span>
+                                <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 4. My Library -->
+                    <div class="feature-card">
+                        <div class="feature-card-header">
+                            <div class="feature-icon-wrapper bg-emerald-subtle">
+                                <svg class="feature-icon text-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            </div>
+                            <span class="status-badge badge-planned">Stage 6 Planned</span>
+                        </div>
+                        <h3 class="feature-title">My Library</h3>
+                        <p class="feature-description">
+                            Access your active borrowing records, request one-click renewals, and receive smart deadline notifications before due dates.
+                        </p>
+                        <div class="feature-card-footer">
+                            <a th:href="@{/my-library}" class="feature-link">
+                                <span>Manage Borrowing</span>
+                                <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 5. Library Quest -->
+                    <div class="feature-card">
+                        <div class="feature-card-header">
+                            <div class="feature-icon-wrapper bg-purple-subtle">
+                                <svg class="feature-icon text-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="8" r="7"/>
+                                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                                </svg>
+                            </div>
+                            <span class="status-badge badge-planned">Stage 7 Planned</span>
+                        </div>
+                        <h3 class="feature-title">Library Quest</h3>
+                        <p class="feature-description">
+                            Explore interactive learning missions, research literacy quizzes, and earn digital achievement badges for library mastery.
+                        </p>
+                        <div class="feature-card-footer">
+                            <a th:href="@{/library-quest}" class="feature-link">
+                                <span>Start Questing</span>
+                                <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 6. Digital Resources -->
+                    <div class="feature-card">
+                        <div class="feature-card-header">
+                            <div class="feature-icon-wrapper bg-teal-subtle">
+                                <svg class="feature-icon text-teal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="2" y1="12" x2="22" y2="12"/>
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                </svg>
+                            </div>
+                            <span class="status-badge badge-ready">External Links</span>
+                        </div>
+                        <h3 class="feature-title">Digital Resources</h3>
+                        <p class="feature-description">
+                            Find official university e-resources, scholarly databases, open-access dissertation repositories, and citation indexes.
+                        </p>
+                        <div class="feature-card-footer">
+                            <a th:href="@{/digital-resources}" class="feature-link">
+                                <span>Explore E-Resources</span>
+                                <svg class="link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             Announcements Section (with Clear Empty State)
+             =================================================================== -->
+        <section class="announcements-section" aria-labelledby="announcements-title">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-tag">Library Bulletin</div>
+                    <h2 id="announcements-title" class="section-heading">Library Announcements</h2>
+                </div>
+
+                <!-- Thymeleaf Empty State Handling -->
+                <div th:if="${#lists.isEmpty(announcements)}" class="empty-state-box">
+                    <div class="empty-icon-wrap">
+                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                    </div>
+                    <h3 class="empty-title">No Current Announcements</h3>
+                    <p class="empty-description">
+                        All library branches are operating on regular semester hours. Check back soon for scheduled workshops, reading group schedules, and holiday hours.
+                    </p>
+                    <div class="empty-meta">
+                        <span>Notice board synchronized with MySQL database: <strong>smartlib_db</strong></span>
+                    </div>
+                </div>
+
+                <!-- If Announcements exist in later stages -->
+                <div th:if="${not #lists.isEmpty(announcements)}" class="announcements-list">
+                    <div th:each="item : ${announcements}" class="announcement-item">
+                        <span th:text="${item}">Announcement item</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================
+             Quick Links to Official Library Services
+             =================================================================== -->
+        <section class="quick-links-section" aria-labelledby="quick-links-title">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-tag">Direct Access</div>
+                    <h2 id="quick-links-title" class="section-heading">Official Library Services</h2>
+                    <p class="section-subheading">
+                        Verified access portals to scholarly repositories and student academic assistance.
+                    </p>
+                </div>
+
+                <div class="quick-links-grid">
+                    <a href="https://doaj.org" target="_blank" rel="noopener noreferrer" class="quick-link-card">
+                        <div class="quick-link-header">
+                            <span class="quick-link-tag">Directory</span>
+                            <span class="external-badge">Verified Ext &nearr;</span>
+                        </div>
+                        <h4 class="quick-link-title">DOAJ Open Access Journals</h4>
+                        <p class="quick-link-desc">Peer-reviewed open access scientific journals and research papers.</p>
+                    </a>
+
+                    <a href="https://www.jstor.org" target="_blank" rel="noopener noreferrer" class="quick-link-card">
+                        <div class="quick-link-header">
+                            <span class="quick-link-tag">Repository</span>
+                            <span class="external-badge">Verified Ext &nearr;</span>
+                        </div>
+                        <h4 class="quick-link-title">JSTOR Academic Archive</h4>
+                        <p class="quick-link-desc">Digital library of academic journals, primary sources, and books.</p>
+                    </a>
+
+                    <a href="https://arxiv.org" target="_blank" rel="noopener noreferrer" class="quick-link-card">
+                        <div class="quick-link-header">
+                            <span class="quick-link-tag">Preprints</span>
+                            <span class="external-badge">Verified Ext &nearr;</span>
+                        </div>
+                        <h4 class="quick-link-title">arXiv Open Repository</h4>
+                        <p class="quick-link-desc">Open-access archive for physics, math, computer science, and engineering.</p>
+                    </a>
+
+                    <a href="https://archive.org" target="_blank" rel="noopener noreferrer" class="quick-link-card">
+                        <div class="quick-link-header">
+                            <span class="quick-link-tag">Lending</span>
+                            <span class="external-badge">Verified Ext &nearr;</span>
+                        </div>
+                        <h4 class="quick-link-title">Internet Archive Library</h4>
+                        <p class="quick-link-desc">Universal access to millions of digitized library books and historical texts.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Reusable Footer Fragment -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <!-- Stage 1 Interactive Placeholder Modal (for Coming Soon features) -->
+    <div id="featureModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
+        <div class="modal-backdrop" id="modalBackdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-badge">SmartLib Stage 1 &bull; Status Notice</div>
+                <button type="button" class="modal-close-btn" id="modalCloseBtn" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3 id="modalTitle" class="modal-title">Feature Coming Soon</h3>
+                <p id="modalDescription" class="modal-text">
+                    This module is scheduled for implementation in a future stage. Stage 1 establishes project structure, database configuration, and homepage layout.
+                </p>
+                <div class="modal-stage-info">
+                    <span class="stage-tag" id="modalStageTag">Stage 3 Planned</span>
+                    <span class="stage-sub">Database: MySQL (smartlib_db)</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="modalConfirmBtn">Understood</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Static JavaScript -->
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

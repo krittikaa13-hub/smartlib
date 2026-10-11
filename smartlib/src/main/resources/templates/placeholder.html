@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${featureName + ' - SmartLib'}">SmartLib Feature</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="site-body">
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="site-main">
+        <div class="container placeholder-page">
+            <div class="placeholder-card">
+                <div class="placeholder-icon-wrap">
+                    <svg class="placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div class="status-badge badge-planned" th:text="${featureStage}">Stage Milestone</div>
+                <h1 class="placeholder-title" th:text="${featureName}">Feature Name</h1>
+                <p class="placeholder-text" th:text="${featureDescription}">
+                    This feature will be introduced in subsequent stages. Stage 1 focuses on architecture foundation, MySQL configuration, and homepage components.
+                </p>
+                <div class="placeholder-actions">
+                    <a th:href="@{/}" class="btn btn-primary">Return to Homepage</a>
+                    <a th:href="@{/api/health}" class="btn btn-secondary" target="_blank">Check Health API</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Campus Circulation &amp; Loan Records - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="site-body">
+
+    <!-- Reusable Header Fragment -->
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="site-main dashboard-main">
+        <div class="container dashboard-container">
+
+            <!-- Admin Banner -->
+            <div class="dashboard-banner admin-banner">
+                <div class="banner-content">
+                    <span class="badge-role badge-role-admin">Administration Console &bull; Stage 4</span>
+                    <h1 class="dashboard-title">Campus-Wide Circulation &amp; Loan Records</h1>
+                    <p class="dashboard-subtitle">
+                        Inspect active checkouts across all academic departments, track physical copy custody, monitor overdue returns, and review audit logs.
+                    </p>
+                </div>
+                <div class="banner-actions">
+                    <a th:href="@{/admin/books}" class="btn btn-secondary">
+                        <span>&larr; Book Inventory</span>
+                    </a>
+                    <a th:href="@{/admin/dashboard}" class="btn btn-primary-outline">
+                        <span>Admin Console &rarr;</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Circulation Metrics Cards -->
+            <div class="dashboard-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Active Campus Loans</span>
+                        <div class="stat-icon-wrapper icon-blue">
+                            <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-value font-mono text-blue-600" th:text="${activeLoansCount}">1</div>
+                    <p class="stat-hint">Physical copies currently checked out</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Overdue Returns</span>
+                        <div class="stat-icon-wrapper icon-amber">
+                            <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-value font-mono"
+                         th:classappend="${overdueCount > 0} ? 'text-red' : 'text-green'"
+                         th:text="${overdueCount}">0</div>
+                    <p class="stat-hint">Loans exceeding 14-day checkout window</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Completed Returns</span>
+                        <div class="stat-icon-wrapper icon-emerald">
+                            <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-value font-mono text-green" th:text="${completedReturnsCount}">1</div>
+                    <p class="stat-hint">Completed circulation cycles in audit ledger</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Total Physical Copies</span>
+                        <div class="stat-icon-wrapper icon-purple">
+                            <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                                <polyline points="2 17 12 22 22 17"/>
+                                <polyline points="2 12 12 17 22 12"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-value font-mono" th:text="${totalCopiesCount}">40</div>
+                    <p class="stat-hint">Individual barcoded items across stacks</p>
+                </div>
+            </div>
+
+            <!-- Circulation Table Panel -->
+            <div class="card-panel mt-6">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">University Circulation Audit Ledger</h2>
+                        <span class="panel-subtitle">Authoritative borrowing records linking borrowers, physical copies, and timestamps</span>
+                    </div>
+                </div>
+
+                <div class="panel-body">
+                    <div th:if="${#lists.isEmpty(records)}" class="empty-state py-8">
+                        <p class="text-muted">No circulation transactions recorded in the system.</p>
+                    </div>
+
+                    <div th:unless="${#lists.isEmpty(records)}" class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Txn ID</th>
+                                    <th>Borrower Details</th>
+                                    <th>Book Title</th>
+                                    <th>Physical Copy</th>
+                                    <th>Shelf Location</th>
+                                    <th>Borrowed Date</th>
+                                    <th>Due Date</th>
+                                    <th>Returned Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="r : ${records}">
+                                    <td class="font-mono text-xs text-muted" th:text="${'#TXN-' + r.id}">#TXN-1</td>
+                                    <td>
+                                        <div class="font-semibold text-slate-900" th:text="${r.user.name}">Jane Scholar</div>
+                                        <div class="font-mono text-xs text-muted" th:text="${r.user.email}">jane.scholar@...</div>
+                                    </td>
+                                    <td>
+                                        <div class="font-semibold text-slate-900 line-clamp-1" th:text="${r.bookCopy.book.title}">
+                                            Introduction to Algorithms
+                                        </div>
+                                        <div class="text-xs text-muted" th:text="${r.bookCopy.book.author}">Thomas Cormen</div>
+                                    </td>
+                                    <td>
+                                        <span class="font-mono text-xs badge-role" th:text="${r.bookCopy.copyCode}">LIB-001-C01</span>
+                                    </td>
+                                    <td class="font-mono text-xs text-slate-600" th:text="${r.bookCopy.shelfLocation}">Stack 2 - Row B</td>
+                                    <td class="font-mono text-xs text-muted" th:text="${#temporals.format(r.borrowedAt, 'MMM dd, yyyy')}">Oct 08, 2026</td>
+                                    <td class="font-mono text-xs font-semibold"
+                                        th:classappend="${r.isOverdue()} ? 'text-red' : 'text-slate-900'"
+                                        th:text="${#temporals.format(r.dueDate, 'MMM dd, yyyy')}">
+                                        Oct 22, 2026
+                                    </td>
+                                    <td class="font-mono text-xs">
+                                        <span th:if="${r.returnedAt != null}" class="text-green font-semibold"
+                                              th:text="${#temporals.format(r.returnedAt, 'MMM dd, yyyy')}">
+                                            Oct 11, 2026
+                                        </span>
+                                        <span th:unless="${r.returnedAt != null}" class="text-muted">
+                                            &mdash; Active &mdash;
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${r.status.name() == 'BORROWED' and !r.isOverdue()}" class="status-badge status-active">
+                                            Active Loan
+                                        </span>
+                                        <span th:if="${r.status.name() == 'BORROWED' and r.isOverdue()}" class="status-badge status-inactive">
+                                            Overdue
+                                        </span>
+                                        <span th:if="${r.status.name() == 'RETURNED'}" class="status-badge bg-slate-100 text-slate-700">
+                                            Returned
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Reusable Footer Fragment -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

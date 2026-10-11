@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartLib - Error Notice</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="site-body">
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="site-main">
+        <div class="container placeholder-page">
+            <div class="placeholder-card error-card">
+                <div class="placeholder-icon-wrap error-icon-wrap">
+                    <svg class="placeholder-icon text-red" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/>
+                        <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                </div>
+                <div class="status-badge badge-error" th:text="${errorTitle != null ? errorTitle : 'Application Error'}">Database Error</div>
+                <h1 class="placeholder-title">Service Interruption</h1>
+                <p class="placeholder-text" th:text="${errorMessage != null ? errorMessage : 'A technical exception occurred while processing the request.'}">
+                    SmartLib could not connect to MySQL database 'smartlib_db'.
+                </p>
+                <div class="code-box-mini" th:if="${technicalDetails != null}">
+                    <code th:text="${technicalDetails}">Technical error details</code>
+                </div>
+                <div class="placeholder-actions">
+                    <a th:href="@{/}" class="btn btn-primary">Retry Homepage</a>
+                    <a th:href="@{/api/health}" class="btn btn-secondary">Inspect Health Status</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

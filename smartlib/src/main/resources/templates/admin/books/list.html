@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Book Inventory Management - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="site-body">
+
+    <!-- Reusable Header Fragment -->
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="site-main dashboard-main">
+        <div class="container dashboard-container">
+
+            <!-- Admin Banner -->
+            <div class="dashboard-banner admin-banner">
+                <div class="banner-content">
+                    <span class="badge-role badge-role-admin">Administration Console &bull; Stage 3</span>
+                    <h1 class="dashboard-title">Book Inventory &amp; Catalog Management</h1>
+                    <p class="dashboard-subtitle">
+                        Manage titles, update copy counts, configure shelf locators, and safely toggle book visibility.
+                    </p>
+                </div>
+                <div class="banner-actions">
+                    <a th:href="@{/admin/books/new}" class="btn btn-primary" id="addNewBookBtn">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <span>Add New Book</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Flash Success & Error Alerts -->
+            <div th:if="${successMessage != null}" class="alert alert-success" role="status">
+                <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <span th:text="${successMessage}">Operation completed successfully.</span>
+            </div>
+
+            <div th:if="${errorMessage != null}" class="alert alert-error" role="alert">
+                <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span th:text="${errorMessage}">An error occurred.</span>
+            </div>
+
+            <!-- Inventory Stats Cards -->
+            <div class="dashboard-stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon-wrap bg-blue-subtle">
+                        <svg class="stat-icon text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0.5-0.05"/>
+                            <path d="M6 6h10"/>
+                            <path d="M6 10h10"/>
+                        </svg>
+                    </div>
+                    <div class="stat-meta">
+                        <span class="stat-label">Active Catalog Titles</span>
+                        <span class="stat-value" th:text="${totalTitles}">6</span>
+                    </div>
+                    <span class="stat-pill">Unique Volumes</span>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon-wrap bg-emerald-subtle">
+                        <svg class="stat-icon text-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                        </svg>
+                    </div>
+                    <div class="stat-meta">
+                        <span class="stat-label">Total Registered Copies</span>
+                        <span class="stat-value" th:text="${totalCopies}">34</span>
+                    </div>
+                    <span class="stat-pill">Campus Inventory</span>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon-wrap bg-purple-subtle">
+                        <svg class="stat-icon text-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <div class="stat-meta">
+                        <span class="stat-label">Available on Shelves</span>
+                        <span class="stat-value text-blue" th:text="${availableCopies}">28</span>
+                    </div>
+                    <span class="stat-pill">In Circulation Pool</span>
+                </div>
+            </div>
+
+            <!-- Book Inventory Table Panel -->
+            <div class="card-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">Bibliographic Inventory Table</h2>
+                        <span class="panel-subtitle">Audited book records persisted in MySQL table 'books'</span>
+                    </div>
+
+                    <!-- Search Filter Form -->
+                    <form th:action="@{/admin/books}" method="get" class="admin-search-form">
+                        <div class="input-icon-wrap">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input
+                                type="search"
+                                name="query"
+                                th:value="${query}"
+                                class="form-control admin-search-input"
+                                placeholder="Search title, author, ISBN..."
+                            />
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-primary">Search</button>
+                    </form>
+                </div>
+
+                <div class="panel-body p-0">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Author</th>
+                                    <th>Category</th>
+                                    <th>ISBN</th>
+                                    <th>Shelf Wayfinder</th>
+                                    <th>Holdings (Avail/Total)</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="book : ${booksPage.content}">
+                                    <td class="font-mono text-xs" th:text="${'#' + book.id}">#1</td>
+                                    <td>
+                                        <a th:href="@{'/catalogue/' + ${book.id}}" class="font-semibold text-slate-900 hover:text-blue-600" th:text="${book.title}">
+                                            Introduction to Algorithms
+                                        </a>
+                                    </td>
+                                    <td class="text-xs text-slate-700" th:text="${book.author}">Thomas Cormen</td>
+                                    <td>
+                                        <span class="book-category-tag" th:text="${book.category}">Computer Science</span>
+                                    </td>
+                                    <td class="font-mono text-xs text-slate-600" th:text="${book.isbn != null ? book.isbn : '-'}">9780262046305</td>
+                                    <td class="font-mono text-xs text-slate-700" th:text="${book.shelfLocation}">Stack 2 - Row B - Bay 1</td>
+                                    <td class="font-mono text-xs">
+                                        <span class="font-bold text-slate-900" th:text="${book.availableCopies}">6</span>
+                                        <span> / </span>
+                                        <span class="text-slate-500" th:text="${book.totalCopies}">8</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-indicator-tag" th:if="${book.active}">
+                                            <span class="status-dot"></span> Active
+                                        </span>
+                                        <span class="status-indicator-tag tag-disabled" th:unless="${book.active}">
+                                            Deactivated
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="table-action-btns">
+                                            <a th:href="@{'/admin/books/' + ${book.id} + '/edit'}"
+                                               class="btn btn-xs btn-secondary" title="Edit book details">
+                                                Edit
+                                            </a>
+
+                                            <!-- Safe deactivation/reactivation form -->
+                                            <form th:action="@{'/admin/books/' + ${book.id} + '/deactivate'}" method="post" class="inline">
+                                                <button type="submit"
+                                                        class="btn btn-xs"
+                                                        th:classappend="${book.active} ? 'btn-danger-outline' : 'btn-success-outline'"
+                                                        th:title="${book.active} ? 'Hide from public search' : 'Make visible in catalogue'">
+                                                    <span th:if="${book.active}">Deactivate</span>
+                                                    <span th:unless="${book.active}">Reactivate</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div th:if="${booksPage.totalPages > 1}" class="pagination-bar mt-6">
+                <a th:if="${booksPage.hasPrevious()}"
+                   th:href="@{/admin/books(page=${booksPage.number - 1}, query=${query})}"
+                   class="page-link">
+                    &larr; Previous
+                </a>
+                <span class="page-link page-current font-mono">
+                    Page <span th:text="${booksPage.number + 1}">1</span> of <span th:text="${booksPage.totalPages}">3</span>
+                </span>
+                <a th:if="${booksPage.hasNext()}"
+                   th:href="@{/admin/books(page=${booksPage.number + 1}, query=${query})}"
+                   class="page-link">
+                    Next &rarr;
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Reusable Footer Fragment -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

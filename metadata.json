@@ -1,0 +1,6 @@
+{
+  "name": "SmartLib - Unified University Library Hub",
+  "description": "Unified University Library Hub with Smart Book Discovery, Deadline Notifications, and Learning Rewards. Stage 4: Borrowing, Returns, Physical Item Tracking, and Transaction History.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

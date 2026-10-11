@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Sign In - SmartLib</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="site-body">
+
+    <!-- Reusable Header Fragment -->
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="site-main auth-main">
+        <div class="container auth-container">
+            <div class="auth-card">
+                <!-- Auth Card Header -->
+                <div class="auth-card-header">
+                    <div class="brand-mark auth-brand-mark">
+                        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0.5-0.05"/>
+                            <path d="M6 6h10"/>
+                            <path d="M6 10h10"/>
+                            <circle cx="18" cy="18" r="3"/>
+                        </svg>
+                    </div>
+                    <h1 class="auth-title">Welcome to SmartLib</h1>
+                    <p class="auth-subtitle">Sign in to access your library dashboard and resources</p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div th:if="${errorMessage != null}" class="alert alert-error" role="alert">
+                    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span th:text="${errorMessage}">Invalid credentials. Please try again.</span>
+                </div>
+
+                <div th:if="${logoutMessage != null}" class="alert alert-info" role="status">
+                    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    <span th:text="${logoutMessage}">You have been logged out securely.</span>
+                </div>
+
+                <div th:if="${successMessage != null}" class="alert alert-success" role="status">
+                    <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <span th:text="${successMessage}">Account registered successfully!</span>
+                </div>
+
+                <!-- Spring Security Form Login -->
+                <form th:action="@{/login}" method="post" class="auth-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="emailInput" class="form-label">University Email Address</label>
+                        <div class="input-icon-wrap">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                            <input
+                                type="email"
+                                id="emailInput"
+                                name="email"
+                                class="form-control"
+                                placeholder="name@university.edu"
+                                required
+                                autofocus
+                                autocomplete="username"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="passwordInput" class="form-label">Password</label>
+                        <div class="input-icon-wrap">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <input
+                                type="password"
+                                id="passwordInput"
+                                name="password"
+                                class="form-control"
+                                placeholder="••••••••"
+                                required
+                                autocomplete="current-password"
+                            />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-auth" id="submitLoginBtn">
+                        <span>Sign In</span>
+                        <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </button>
+                </form>
+
+                <!-- Initial Admin Bootstrap Tip & Registration Link -->
+                <div class="auth-helper-box">
+                    <div class="auth-helper-title">Development Bootstrap Accounts:</div>
+                    <div class="auth-helper-item">
+                        <strong>Admin:</strong> <code>admin@smartlib.edu</code> / <code>Admin@123</code>
+                    </div>
+                    <div class="auth-helper-desc">
+                        Or register your own student/faculty account below.
+                    </div>
+                </div>
+
+                <div class="auth-footer-prompt">
+                    <span>Don't have a library account yet?</span>
+                    <a th:href="@{/register}" class="auth-link font-semibold">Create an Account</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Reusable Footer Fragment -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

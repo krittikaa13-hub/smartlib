@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Reusable Footer Fragment -->
+    <footer th:fragment="footer" class="site-footer" role="contentinfo">
+        <div class="container footer-container">
+            <div class="footer-grid">
+                <!-- Column 1: About SmartLib -->
+                <div class="footer-col footer-about">
+                    <div class="brand-link footer-brand">
+                        <div class="brand-mark brand-mark-sm">
+                            <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0.5-0.05"/>
+                                <path d="M6 6h10"/>
+                                <path d="M6 10h10"/>
+                                <circle cx="18" cy="18" r="3"/>
+                            </svg>
+                        </div>
+                        <span class="brand-title">SmartLib Hub</span>
+                    </div>
+                    <p class="footer-description">
+                        Unified University Library Hub with Smart Book Discovery, Deadline Notifications and Learning Rewards. Built with Spring Boot 3 &amp; Thymeleaf.
+                    </p>
+                    <p class="footer-disclaimer">
+                        <small>Independent academic library software project. Demonstrator platform for university collections and study support.</small>
+                    </p>
+                </div>
+
+                <!-- Column 2: Navigation Links -->
+                <div class="footer-col">
+                    <h3 class="footer-heading">Library Navigation</h3>
+                    <ul class="footer-links">
+                        <li><a th:href="@{/}">Home Portal</a></li>
+                        <li><a th:href="@{/catalogue}">Book Catalogue (Stage 3)</a></li>
+                        <li><a th:href="@{/syllabus-finder}">Syllabus Finder (Stage 4)</a></li>
+                        <li><a th:href="@{/shelf-finder}">Find on Shelf (Stage 5)</a></li>
+                        <li><a th:href="@{/my-library}">My Library &amp; Loans (Stage 6)</a></li>
+                        <li><a th:href="@{/library-quest}">Library Quest (Stage 7)</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Verified Digital Resources -->
+                <div class="footer-col">
+                    <h3 class="footer-heading">Digital Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="https://doaj.org" target="_blank" rel="noopener noreferrer">Directory of Open Access Journals (DOAJ)</a></li>
+                        <li><a href="https://www.jstor.org" target="_blank" rel="noopener noreferrer">JSTOR Open Access Content</a></li>
+                        <li><a href="https://archive.org" target="_blank" rel="noopener noreferrer">Internet Archive Books</a></li>
+                        <li><a href="https://arxiv.org" target="_blank" rel="noopener noreferrer">arXiv Research Preprints</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Contact & System Info -->
+                <div class="footer-col">
+                    <h3 class="footer-heading">Support &amp; Desk</h3>
+                    <div class="contact-info">
+                        <p class="contact-item">
+                            <span class="contact-label">Help Desk:</span>
+                            <span class="contact-value">Room 204, Central Library</span>
+                        </p>
+                        <p class="contact-item">
+                            <span class="contact-label">Email:</span>
+                            <span class="contact-value">library-support@university.edu.example</span>
+                        </p>
+                        <p class="contact-item">
+                            <span class="contact-label">Hours:</span>
+                            <span class="contact-value">Mon - Fri: 8:00 AM - 10:00 PM</span>
+                        </p>
+                        <p class="contact-item">
+                            <span class="contact-label">Weekend:</span>
+                            <span class="contact-value">Sat - Sun: 10:00 AM - 6:00 PM</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p class="copyright">
+                        &copy; <span id="currentYear">2026</span> SmartLib University Library System. All rights reserved.
+                    </p>
+                    <div class="footer-meta">
+                        <span class="meta-tag">Java 21</span>
+                        <span class="meta-tag">Spring Boot 3.3.4</span>
+                        <span class="meta-tag">MySQL smartlib_db</span>
+                        <a th:href="@{/api/health}" class="meta-link" target="_blank">Health API &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

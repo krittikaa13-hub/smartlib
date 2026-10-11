@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Book Details - SmartLib</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="site-body">
+
+    <!-- Reusable Header Fragment -->
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="site-main details-main">
+        <div class="container details-container">
+
+            <!-- Breadcrumb Navigation -->
+            <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+                <a th:href="@{/}">Home</a>
+                <span class="breadcrumb-sep">&gt;</span>
+                <a th:href="@{/catalogue}">Book Catalogue</a>
+                <span class="breadcrumb-sep">&gt;</span>
+                <span class="breadcrumb-current" th:text="${book.title}">Book Title</span>
+            </nav>
+
+            <!-- Book Details Card -->
+            <div class="book-details-card">
+                <div class="details-grid">
+                    <!-- Left: Book Spine & Summary -->
+                    <div class="book-cover-panel">
+                        <div class="book-cover-visual">
+                            <div class="book-category-spine" th:text="${book.category}">Computer Science</div>
+                            <h3 class="cover-title" th:text="${book.title}">Book Title</h3>
+                            <p class="cover-author" th:text="${book.author}">Author Name</p>
+                        </div>
+
+                        <div class="availability-callout">
+                            <span class="callout-label">Holdings Status</span>
+                            <div class="callout-value font-mono">
+                                <span th:text="${book.availableCopies}">3</span> of 
+                                <span th:text="${book.totalCopies}">5</span> Available
+                            </div>
+                            <div class="callout-status" th:if="${book.availableCopies > 0}">
+                                <span class="status-dot"></span> In Stock on Campus
+                            </div>
+                            <div class="callout-status text-red" th:unless="${book.availableCopies > 0}">
+                                All copies currently checked out
+                            </div>
+                        </div>
+
+                        <!-- Active Borrowing Action Box (Stage 4) -->
+                        <div class="borrow-notice-box">
+                            <span class="badge-role">Campus Circulation (Stage 4)</span>
+
+                            <!-- Authenticated User Borrow Action -->
+                            <div sec:authorize="isAuthenticated()" class="mt-2">
+                                <div th:if="${book.availableCopies > 0}">
+                                    <p class="text-xs text-muted mb-2">
+                                        Standard loan period is <strong th:text="${loanDurationDays != null ? loanDurationDays : 14}">14</strong> days. Maximum concurrent loans: <strong th:text="${maxLoans != null ? maxLoans : 3}">3</strong>.
+                                    </p>
+                                    <form th:action="@{'/borrow/' + ${book.id}}" method="post"
+                                          onsubmit="return confirm('Confirm checkout of an available copy of this title?');">
+                                        <button type="submit" class="btn btn-primary btn-sm w-full" id="borrowBookBtn">
+                                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                                            </svg>
+                                            <span>Borrow Physical Copy</span>
+                                        </button>
+                                    </form>
+                                </div>
+                                <div th:unless="${book.availableCopies > 0}" class="text-xs text-red font-medium mt-1">
+                                    All physical copies are currently checked out. Please check back when a copy is returned.
+                                </div>
+                            </div>
+
+                            <!-- Anonymous Visitor Prompt -->
+                            <div sec:authorize="isAnonymous()" class="mt-2 text-xs">
+                                <p class="text-muted mb-2">
+                                    Sign in with your university credentials to borrow physical copies.
+                                </p>
+                                <a th:href="@{/login}" class="btn btn-primary-outline btn-sm w-full text-center">
+                                    Sign In to Borrow
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Physical Copy Holdings Table -->
+                        <div th:if="${copies != null and !#lists.isEmpty(copies)}" class="mt-4 pt-3 border-t border-slate-700 text-xs">
+                            <span class="text-xs uppercase font-mono text-slate-400 font-semibold block mb-2">
+                                Physical Barcodes
+                            </span>
+                            <div class="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                                <div th:each="c : ${copies}" class="flex items-center justify-between p-1.5 rounded bg-slate-800/80 border border-slate-700 font-mono text-[11px]">
+                                    <span class="text-slate-200" th:text="${c.copyCode}">LIB-001-C01</span>
+                                    <span th:if="${c.status.name() == 'AVAILABLE'}" class="text-emerald-400 font-semibold">Available</span>
+                                    <span th:if="${c.status.name() == 'BORROWED'}" class="text-amber-400">On Loan</span>
+                                    <span th:if="${c.status.name() == 'INACTIVE'}" class="text-slate-500">Withdrawn</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Metadata & Shelf Location -->
+                    <div class="book-info-panel">
+                        <div class="book-info-header">
+                            <span class="book-category-tag" th:text="${book.category}">Category</span>
+                            <h1 class="book-detail-title" th:text="${book.title}">Book Title</h1>
+                            <p class="book-detail-author">
+                                Authored by <strong th:text="${book.author}">Author Name</strong>
+                            </p>
+                        </div>
+
+                        <!-- Shelf Location Wayfinder Box -->
+                        <div class="shelf-location-card">
+                            <div class="shelf-icon-wrap">
+                                <svg class="shelf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                                    <polyline points="2 17 12 22 22 17"/>
+                                    <polyline points="2 12 12 17 22 12"/>
+                                </svg>
+                            </div>
+                            <div class="shelf-info">
+                                <span class="shelf-heading">Physical Shelf Wayfinder (Stage 5 Linked)</span>
+                                <span class="shelf-coordinates font-mono" th:text="${book.shelfLocation}">Stack 2 - Row B - Bay 1</span>
+                                <span class="shelf-note">Consult aisle map at Floor 2 Central Wing</span>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="book-synopsis-section">
+                            <h3 class="section-sub-title">Synopsis &amp; Abstract</h3>
+                            <p class="book-description-text" th:text="${book.description}">
+                                Full bibliographic overview and academic subject matter.
+                            </p>
+                        </div>
+
+                        <!-- Metadata Table -->
+                        <div class="metadata-table-section">
+                            <h3 class="section-sub-title">Bibliographic Record</h3>
+                            <div class="metadata-grid">
+                                <div class="meta-item">
+                                    <span class="meta-label">ISBN:</span>
+                                    <span class="meta-value font-mono" th:text="${book.isbn != null ? book.isbn : 'Not Assigned'}">9780262046305</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Publisher:</span>
+                                    <span class="meta-value" th:text="${book.publisher != null ? book.publisher : 'University Press'}">MIT Press</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Publication Year:</span>
+                                    <span class="meta-value font-mono" th:text="${book.publicationYear}">2022</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Catalogue Catalog ID:</span>
+                                    <span class="meta-value font-mono" th:text="${'#B-' + book.id}">#B-1</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="details-action-bar">
+                            <a th:href="@{/catalogue}" class="btn btn-secondary">
+                                &larr; Return to Catalogue
+                            </a>
+
+                            <div sec:authorize="hasRole('ADMIN')">
+                                <a th:href="@{'/admin/books/' + ${book.id} + '/edit'}" class="btn btn-primary">
+                                    Edit Book Details (Admin) &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Reusable Footer Fragment -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

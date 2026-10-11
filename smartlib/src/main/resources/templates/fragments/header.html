@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Reusable Header Fragment with Spring Security Role-Based Navigation -->
+    <header th:fragment="header" class="site-header">
+        <div class="top-announcement-bar">
+            <div class="container top-bar-content">
+                <div class="top-bar-left">
+                    <span class="badge-pill">Stage 4</span>
+                    <span>SmartLib University Hub &bull; Borrowing, Returns &amp; Circulation History Active</span>
+                </div>
+                <div class="top-bar-meta">
+                    <!-- Display logged-in status -->
+                    <span sec:authorize="isAuthenticated()" class="auth-status-chip">
+                        <span>Signed in as: </span>
+                        <strong sec:authentication="name" class="text-white">user@university.edu</strong>
+                        <span sec:authorize="hasRole('ADMIN')" class="chip-admin">ADMIN</span>
+                        <span sec:authorize="hasRole('USER')" class="chip-user">USER</span>
+                    </span>
+                    <span sec:authorize="isAnonymous()">
+                        Port 8080 &bull; MySQL: smartlib_db
+                    </span>
+                </div>
+            </div>
+        </div>
+        <nav class="navbar" role="navigation" aria-label="Main Navigation">
+            <div class="container nav-container">
+                <!-- Brand Logo & Title -->
+                <a th:href="@{/}" class="brand-link" aria-label="SmartLib Home">
+                    <div class="brand-mark">
+                        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0.5-0.05"/>
+                            <path d="M6 6h10"/>
+                            <path d="M6 10h10"/>
+                            <path d="M6 14h7"/>
+                            <circle cx="18" cy="18" r="3"/>
+                            <path d="m20.5 20.5-1.5-1.5"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-title">SmartLib</span>
+                        <span class="brand-subtitle">University Library Hub</span>
+                    </div>
+                </a>
+
+                <!-- Mobile Navigation Toggle Button -->
+                <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Toggle navigation menu">
+                    <span class="nav-toggle-bar"></span>
+                    <span class="nav-toggle-bar"></span>
+                    <span class="nav-toggle-bar"></span>
+                </button>
+
+                <!-- Navigation Links List -->
+                <div class="nav-menu" id="primaryNav">
+                    <ul class="nav-list">
+                        <li class="nav-item">
+                            <a th:href="@{/}" class="nav-link" th:classappend="${activeNav == 'home'} ? 'active' : ''" aria-current="${activeNav == 'home'} ? 'page' : null">
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:href="@{/catalogue}" class="nav-link" th:classappend="${activeNav == 'catalogue'} ? 'active' : ''">
+                                Book Catalogue
+                            </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="isAuthenticated()">
+                            <a th:href="@{/my-library}" class="nav-link" th:classappend="${activeNav == 'my-library' or activeNav == 'myLibrary'} ? 'active' : ''">
+                                My Library
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:href="@{/syllabus-finder}" class="nav-link" th:classappend="${activeNav == 'syllabus'} ? 'active' : ''">
+                                Syllabus Finder
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:href="@{/shelf-finder}" class="nav-link" th:classappend="${activeNav == 'shelf'} ? 'active' : ''">
+                                Find on Shelf
+                            </a>
+                        </li>
+
+                        <!-- Conditional Role Links -->
+                        <li class="nav-item" sec:authorize="hasRole('USER')">
+                            <a th:href="@{/dashboard}" class="nav-link nav-link-highlight" th:classappend="${activeNav == 'dashboard'} ? 'active' : ''">
+                                My Dashboard
+                            </a>
+                        </li>
+
+                        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                            <a th:href="@{/admin/dashboard}" class="nav-link nav-link-admin" th:classappend="${activeNav == 'admin'} ? 'active' : ''">
+                                Admin Console
+                            </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                            <a th:href="@{/admin/books}" class="nav-link" th:classappend="${activeNav == 'adminBooks'} ? 'active' : ''">
+                                Book Inventory
+                            </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                            <a th:href="@{/admin/borrowings}" class="nav-link" th:classappend="${activeNav == 'adminBorrowings'} ? 'active' : ''">
+                                Circulation Audit
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Auth Action Buttons -->
+                    <div class="nav-auth">
+                        <!-- Anonymous Users (Login & Register) -->
+                        <div sec:authorize="isAnonymous()" class="auth-buttons-group">
+                            <a th:href="@{/register}" class="btn btn-secondary-sm">
+                                Register
+                            </a>
+                            <a th:href="@{/login}" class="btn btn-primary-outline btn-login">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                    <polyline points="10 17 15 12 10 7"/>
+                                    <line x1="15" y1="12" x2="3" y2="12"/>
+                                </svg>
+                                <span>Login</span>
+                            </a>
+                        </div>
+
+                        <!-- Authenticated Users (Logout POST Form with CSRF) -->
+                        <div sec:authorize="isAuthenticated()" class="auth-logged-in-group">
+                            <form th:action="@{/logout}" method="post" class="logout-form">
+                                <button type="submit" class="btn btn-logout" id="logoutBtn" title="Log out of SmartLib">
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                        <polyline points="16 17 21 12 16 7"/>
+                                        <line x1="21" y1="12" x2="9" y2="12"/>
+                                    </svg>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+</body>
+</html>

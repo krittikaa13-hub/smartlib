@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Book Catalogue - SmartLib</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="site-body">
+
+    <!-- Reusable Header Fragment -->
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="site-main catalogue-main">
+        <div class="container catalogue-container">
+
+            <!-- Catalogue Banner -->
+            <div class="catalogue-header-banner">
+                <div class="banner-text">
+                    <span class="badge-pill">Stage 3 &bull; Inventory Connected</span>
+                    <h1 class="catalogue-title">University Book Catalogue</h1>
+                    <p class="catalogue-subtitle">
+                        Explore physical volumes and academic reference texts across all university library stacks.
+                    </p>
+                </div>
+
+                <div class="catalogue-stats-pill" sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/books}" class="btn btn-primary-outline btn-sm">
+                        <span>Manage Inventory in Admin &rarr;</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search, Filter & Sort Form -->
+            <form th:action="@{/catalogue}" method="get" class="catalogue-filter-bar" id="catalogueFilterForm">
+                <!-- Search Input -->
+                <div class="filter-search-group">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input
+                        type="search"
+                        name="query"
+                        th:value="${query}"
+                        class="form-control catalogue-search-input"
+                        placeholder="Search by title, author, ISBN or keyword..."
+                        aria-label="Search book catalogue"
+                    />
+                </div>
+
+                <!-- Category Filter Dropdown -->
+                <div class="filter-select-group">
+                    <select name="category" class="form-control select-control" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat}"
+                                th:text="${cat}"
+                                th:selected="${cat == selectedCategory}">
+                            Computer Science
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Sorting Dropdown -->
+                <div class="filter-select-group">
+                    <select name="sortBy" class="form-control select-control" onchange="this.form.submit()">
+                        <option value="title" th:selected="${sortBy == 'title'}">Sort by Title</option>
+                        <option value="author" th:selected="${sortBy == 'author'}">Sort by Author</option>
+                    </select>
+                </div>
+
+                <!-- Direction -->
+                <div class="filter-select-group sort-direction-group">
+                    <select name="direction" class="form-control select-control" onchange="this.form.submit()">
+                        <option value="asc" th:selected="${direction == 'asc'}">Ascending (A-Z)</option>
+                        <option value="desc" th:selected="${direction == 'desc'}">Descending (Z-A)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-filter">Filter</button>
+                <a th:href="@{/catalogue}" class="btn btn-secondary btn-reset" title="Reset filters">Reset</a>
+            </form>
+
+            <!-- Results Summary -->
+            <div class="catalogue-results-meta">
+                <span th:if="${booksPage.totalElements > 0}" class="results-count">
+                    Showing <strong th:text="${booksPage.numberOfElements}">9</strong> of 
+                    <strong th:text="${booksPage.totalElements}">24</strong> library titles
+                    <span th:if="${query != null and !query.isEmpty()}">
+                        matching "<em><span th:text="${query}"></span></em>"
+                    </span>
+                    <span th:if="${selectedCategory != null and !selectedCategory.isEmpty()}">
+                        in <strong><span th:text="${selectedCategory}"></span></strong>
+                    </span>
+                </span>
+                <span th:if="${booksPage.totalElements == 0}" class="results-count text-muted">
+                    No results found
+                </span>
+
+                <div class="catalogue-badges">
+                    <span class="meta-tag">Titles: <strong th:text="${totalActiveTitles}">6</strong></span>
+                    <span class="meta-tag">Available Copies: <strong th:text="${totalAvailableCopies}">28</strong></span>
+                </div>
+            </div>
+
+            <!-- Book Cards Grid -->
+            <div th:if="${not #lists.isEmpty(booksPage.content)}" class="books-grid">
+                <div th:each="book : ${booksPage.content}" class="book-card">
+                    <div class="book-card-header">
+                        <span class="book-category-tag" th:text="${book.category}">Computer Science</span>
+                        <span class="book-year font-mono" th:text="${book.publicationYear != null ? book.publicationYear : ''}">2022</span>
+                    </div>
+
+                    <h2 class="book-title">
+                        <a th:href="@{'/catalogue/' + ${book.id}}" th:text="${book.title}">Book Title</a>
+                    </h2>
+
+                    <p class="book-author">
+                        <span>by </span><strong th:text="${book.author}">Author Name</strong>
+                    </p>
+
+                    <div class="book-location-row">
+                        <svg class="location-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                            <polyline points="2 17 12 22 22 17"/>
+                            <polyline points="2 12 12 17 22 12"/>
+                        </svg>
+                        <span class="shelf-text font-mono" th:text="${book.shelfLocation}">Stack 2 - Row B - Bay 1</span>
+                    </div>
+
+                    <div class="book-card-footer">
+                        <div class="book-availability">
+                            <span class="availability-pill" 
+                                  th:classappend="${book.availableCopies > 0} ? 'avail-in-stock' : 'avail-out-of-stock'">
+                                <span class="avail-dot"></span>
+                                <span th:text="${book.availableCopies + ' / ' + book.totalCopies + ' Available'}">3 / 5 Available</span>
+                            </span>
+                        </div>
+
+                        <div class="book-card-actions">
+                            <a th:href="@{'/catalogue/' + ${book.id}}" class="btn btn-sm btn-outline-primary">
+                                Details &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(booksPage.content)}" class="empty-state-box">
+                <div class="empty-icon-wrap">
+                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </div>
+                <h3 class="empty-title">No Matching Books Found</h3>
+                <p class="empty-description">
+                    We could not find any books matching your search query or selected category filter. Try clearing the filter or searching by an alternate author, title, or ISBN.
+                </p>
+                <div class="empty-actions">
+                    <a th:href="@{/catalogue}" class="btn btn-primary">Clear Filters &amp; View All</a>
+                </div>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div th:if="${booksPage.totalPages > 1}" class="pagination-bar">
+                <a th:if="${booksPage.hasPrevious()}"
+                   th:href="@{/catalogue(page=${booksPage.number - 1}, query=${query}, category=${selectedCategory}, sortBy=${sortBy}, direction=${direction})}"
+                   class="page-link page-prev">
+                    &larr; Previous
+                </a>
+                <span th:unless="${booksPage.hasPrevious()}" class="page-link page-disabled">
+                    &larr; Previous
+                </span>
+
+                <div class="page-numbers">
+                    <span th:each="pageNum : ${#numbers.sequence(0, booksPage.totalPages - 1)}">
+                        <a th:if="${pageNum != booksPage.number}"
+                           th:href="@{/catalogue(page=${pageNum}, query=${query}, category=${selectedCategory}, sortBy=${sortBy}, direction=${direction})}"
+                           class="page-link"
+                           th:text="${pageNum + 1}">1</a>
+                        <span th:if="${pageNum == booksPage.number}"
+                              class="page-link page-current"
+                              th:text="${pageNum + 1}">1</span>
+                    </span>
+                </div>
+
+                <a th:if="${booksPage.hasNext()}"
+                   th:href="@{/catalogue(page=${booksPage.number + 1}, query=${query}, category=${selectedCategory}, sortBy=${sortBy}, direction=${direction})}"
+                   class="page-link page-next">
+                    Next &rarr;
+                </a>
+                <span th:unless="${booksPage.hasNext()}" class="page-link page-disabled">
+                    Next &rarr;
+                </span>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Reusable Footer Fragment -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>
